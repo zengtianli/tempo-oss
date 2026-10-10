@@ -1,0 +1,16 @@
+Tempo · 倍速 / Third-party notices
+
+Global Speed (https://github.com/polywock/globalSpeed) is a functional reference
+for global playback speed and media shortcuts. Tempo uses its own Safari media
+engine, settings, popup and native host; no Global Speed source code or assets
+are included. This notice acknowledges the product inspiration, not a code
+license grant.
+
+Global Speed's repository does not provide a LICENSE file. Its author states
+that its source is available with all rights reserved:
+https://github.com/polywock/globalSpeed/issues/247
+Tempo's MIT license does not cover Global Speed or authorize copying its code.
+
+Tempo has no bundled third-party JavaScript dependencies. The native host uses
+Apple system frameworks. Building and testing use Xcode, XcodeGen, Python,
+Pillow and FFmpeg; these tools are not redistributed in the application.

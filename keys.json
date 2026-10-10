@@ -1,0 +1,11 @@
+[
+  {"component":"Tempo","mode":"app:Safari 网页（有视频或音频时）","key":"D","description":"加速 0.1"},
+  {"component":"Tempo","mode":"app:Safari 网页（有视频或音频时）","key":"A","description":"减速 0.1"},
+  {"component":"Tempo","mode":"app:Safari 网页（有视频或音频时）","key":"S","description":"1× 与上次速度之间切换"},
+  {"component":"Tempo","mode":"app:Safari 网页（有视频或音频时）","key":"X","description":"快进 10 秒"},
+  {"component":"Tempo","mode":"app:Safari 网页（有视频或音频时）","key":"Z","description":"快退 10 秒"},
+  {"component":"Tempo","mode":"app:Safari 网页（有视频或音频时）","key":"⇧X","description":"下一帧"},
+  {"component":"Tempo","mode":"app:Safari 网页（有视频或音频时）","key":"⇧Z","description":"上一帧"},
+  {"component":"Tempo","mode":"app:Safari 网页（有视频或音频时）","key":"⇧W","description":"记下当前位置"},
+  {"component":"Tempo","mode":"app:Safari 网页（有视频或音频时）","key":"W","description":"回到记下的位置"}
+]

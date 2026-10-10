@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><img src="images/icon-96.png" alt=""><b>Tempo</b><span>倍速</span></div>
+    <label class="switch" title="开 / 关"><input id="enabled" type="checkbox"><i></i></label>
+  </header>
+
+  <section class="dial">
+    <button id="slower" class="round" title="减速">−</button>
+    <button id="speed" class="readout" title="在 1× 和上次速度之间切换">1×</button>
+    <button id="faster" class="round" title="加速">+</button>
+  </section>
+
+  <section id="presets" class="grid"></section>
+
+  <section class="site" id="site">
+    <div id="host" class="host"></div>
+    <label><input id="siteRule" type="checkbox"> 本站单独记速度</label>
+    <label><input id="siteOff" type="checkbox"> 本站停用</label>
+  </section>
+
+  <details id="more">
+    <summary>快捷键与设置</summary>
+    <p class="hint">点一个按键后按下新的组合；Esc 取消，Delete 清除。</p>
+    <div id="keys" class="keys"></div>
+    <div class="row">
+      <label>每次加减 <input id="step" type="number" min="0.01" max="1" step="0.05"></label>
+      <label>快进快退 <input id="seek" type="number" min="1" max="600" step="1"> 秒</label>
+    </div>
+    <label class="row"><input id="indicator" type="checkbox"> 在页面左上角显示提示</label>
+    <label class="row" title="打开后，有视频或音频的页面会让扩展保持待命，tempo page 与 tempo do 才够得着它；只在本机传递"><input id="remote" type="checkbox"> 允许 tempo 命令控制当前页的视频</label>
+    <div class="row buttons">
+      <button id="export">导出配置</button>
+      <button id="import">导入配置</button>
+      <button id="defaults">恢复默认</button>
+    </div>
+    <textarea id="io" hidden spellcheck="false" placeholder="把导出的配置粘贴到这里，再点一次“导入配置”"></textarea>
+    <div id="note" class="note"></div>
+  </details>
+
+  <script src="shared.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

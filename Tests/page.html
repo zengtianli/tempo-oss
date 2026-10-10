@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Tempo test page</title></head>
+<body>
+  <video id="v" src="fixtures/clip.mp4" muted playsinline preload="auto" width="640" height="360"></video>
+  <input id="text" type="text">
+  <div id="host"></div>
+  <div id="inputHost"></div>
+  <script>
+    // A player and a text field the page keeps behind closed shadow roots.
+    const playerRoot = document.getElementById('host').attachShadow({ mode: 'closed' });
+    const sv = document.createElement('video');
+    sv.src = 'fixtures/clip.mp4';
+    sv.muted = true;
+    sv.preload = 'auto';
+    playerRoot.appendChild(sv);
+    const inputRoot = document.getElementById('inputHost').attachShadow({ mode: 'closed' });
+    const hidden = document.createElement('input');
+    inputRoot.appendChild(hidden);
+    window.fixture = { sv, hidden };
+  </script>
+</body>
+</html>

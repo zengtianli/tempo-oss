@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "Tempo · 倍速",
+  "description": "给所有网页视频和音频设一个播放速度：全局生效，键盘加速减速，可按网站单独记住。",
+  "version": "0.1.3",
+  "icons": {
+    "48": "images/icon-48.png",
+    "96": "images/icon-96.png",
+    "128": "images/icon-128.png",
+    "256": "images/icon-256.png",
+    "512": "images/icon-512.png"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["engine.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["shared.js", "engine.js", "content.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true
+    }
+  ],
+  "action": {
+    "default_title": "Tempo · 倍速",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/toolbar-16.png",
+      "19": "images/toolbar-19.png",
+      "32": "images/toolbar-32.png",
+      "38": "images/toolbar-38.png",
+      "48": "images/toolbar-48.png",
+      "72": "images/toolbar-72.png"
+    }
+  },
+  "permissions": ["storage", "nativeMessaging"],
+  "host_permissions": ["<all_urls>"]
+}
