@@ -2,6 +2,8 @@
 
 [中文](README.md) | **English**
 
+[Download the distribution ZIP](https://github.com/zengtianli/tempo-oss/releases/download/v0.1.3/Tempo-0.1.3-mac.zip) · [MIT source snapshot](https://github.com/zengtianli/tempo-oss).
+
 Set one playback speed for videos and audio in Safari, adjust it with the keyboard, and remember a speed or disable the extension per site. [Global Speed](https://github.com/polywock/globalSpeed) inspired the features; Tempo provides its own Safari implementation.
 
 ## Install and enable

@@ -2,6 +2,8 @@
 
 **中文** | [English](README_EN.md)
 
+[下载正式 ZIP](https://github.com/zengtianli/tempo-oss/releases/download/v0.1.3/Tempo-0.1.3-mac.zip) · [MIT 公开源码](https://github.com/zengtianli/tempo-oss)。
+
 给 Safari 网页的视频和音频设定统一播放速度，随时用键盘调整，也能按网站记住速度或停用规则。功能灵感来自 [Global Speed](https://github.com/polywock/globalSpeed)，Safari 实现由 Tempo 自己提供。
 
 ## 安装与启用
