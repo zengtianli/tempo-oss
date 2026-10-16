@@ -46,6 +46,10 @@ def main():
             content = content.replace(b"DEVELOPMENT_TEAM: B9LJH93LA4", b'DEVELOPMENT_TEAM: ""')
         if name == "build.sh":
             content = content.replace(b"-quiet build", b'${DEVELOPMENT_TEAM:+DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM"} -quiet build')
+            # The development-only Chapter receipt adapter is outside the public allowlist.
+            content = b"\n".join(line for line in content.split(b"\n") if b'exec "${PYTHON:-python3}" scripts/build-candidate.py' not in line)
+        if name == "README.md":
+            content = "\n".join(line for line in content.decode().split("\n") if not line.startswith('- `bash build.sh --candidate`')).encode()
         target = destination / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(content)

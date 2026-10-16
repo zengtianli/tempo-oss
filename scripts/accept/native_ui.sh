@@ -5,6 +5,7 @@
 # on screen and Safari is not driven.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
+python3 scripts/accept/product_basics.py --ui-only "$@"
 tool=build/tests/snapshot
 if [ ! -x "$tool" ] || [ Tests/snapshot.swift -nt "$tool" ]; then mkdir -p build/tests; swiftc -O -o "$tool" Tests/snapshot.swift; fi
 out="${SOP_OUT_DIR:-build/accept/native-ui}"; mkdir -p "$out"

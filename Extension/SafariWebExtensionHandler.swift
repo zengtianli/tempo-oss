@@ -5,6 +5,12 @@ import SafariServices
 /// native message, Relay answers it when the command line asks for something. Nothing leaves this Mac.
 final class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
     func beginRequest(with context: NSExtensionContext) {
+        #if APP_STORE
+        // The Store edition has no CLI/native mailbox and requests no nativeMessaging permission.
+        let response = NSExtensionItem()
+        response.userInfo = [SFExtensionMessageKey: ["error": "unsupported"]]
+        context.completeRequest(returningItems: [response], completionHandler: nil)
+        #else
         let item = context.inputItems.first as? NSExtensionItem
         let message = item?.userInfo?[SFExtensionMessageKey] as? [String: Any] ?? [:]
         let profile = (item?.userInfo?[SFExtensionProfileKey] as? UUID)?.uuidString ?? ""
@@ -13,5 +19,6 @@ final class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
             response.userInfo = [SFExtensionMessageKey: reply]
             context.completeRequest(returningItems: [response], completionHandler: nil)
         }
+        #endif
     }
 }

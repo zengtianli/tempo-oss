@@ -17,8 +17,8 @@ CLI=build/tests/tempo-cli
 RELAY=build/tests/tempo-relay
 mkdir -p build/tests
 newer() { local out="$1"; shift; [ ! -x "$out" ] && return 0; for f in "$@"; do [ "$f" -nt "$out" ] && return 0; done; return 1; }
-if newer "$CLI" App/TempoApp.swift App/TempoCLI.swift App/TempoRemote.swift Shared/Mailbox.swift; then
-  swiftc -O -parse-as-library -o "$CLI" App/TempoApp.swift App/TempoCLI.swift App/TempoRemote.swift Shared/Mailbox.swift
+if newer "$CLI" App/*.swift Shared/Mailbox.swift; then
+  swiftc -O -parse-as-library -o "$CLI" App/*.swift Shared/Mailbox.swift
 fi
 if newer "$RELAY" Tests/standin.swift Extension/Relay.swift Shared/Mailbox.swift; then
   swiftc -O -parse-as-library -o "$RELAY" Tests/standin.swift Extension/Relay.swift Shared/Mailbox.swift
@@ -202,7 +202,7 @@ check("status keeps its own shape (this test build is not notarized: exit 3)",
 rc, _, out, _ = run("--help")
 listed = [line.split()[1] for line in out.splitlines() if line.strip().startswith("tempo ")]
 check("--help lists every command at the start of a line, and the four things an agent needs",
-      rc == 0 and set(listed) == {"status", "show", "page", "keys", "export", "speed", "on", "site", "set", "bind", "import", "defaults", "do"}
+      rc == 0 and set(listed) == {"status", "show", "page", "keys", "export", "speed", "on", "site", "set", "bind", "import", "defaults", "do", "config", "update"}
       and "tempo on | off" in out and all(word in out for word in ("读命令", "写命令", "--json 输出", "退出码", "仅在窗口中", "命令通道")), listed)
 
 # The page in Safari's current tab: `page`, `do`, and write commands telling open pages to read again.

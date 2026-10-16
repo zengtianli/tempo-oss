@@ -1,3 +1,4 @@
+#if !APP_STORE
 import Foundation
 
 /// The mailbox between the `tempo` command and the app extension, one definition for both sides.
@@ -49,3 +50,4 @@ enum Mailbox {
         }
     }
 }
+#endif

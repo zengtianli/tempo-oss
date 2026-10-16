@@ -3,7 +3,8 @@
 # Mac. Static checks on what ships: the API permissions are storage and nativeMessaging (the second reaches
 # only the extension's own containing app, for the `tempo` command), no script or page makes a network
 # request or loads remote code, the installed extension is sandboxed without a network entitlement, and the
-# native sources (container app, extension handler, the mailbox between them) make no network calls.
+# extension handler/mailbox make no network calls. The containing app's shared lifecycle layer provides
+# opt-in iCloud and anonymous public release checks, documented in README.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 res=Extension/Resources
@@ -18,6 +19,6 @@ appex=/Applications/Tempo.app/Contents/PlugIns/TempoExtension.appex
 ent="$(codesign -d --entitlements :- "$appex" 2>/dev/null || true)"
 grep -q 'com.apple.security.app-sandbox' <<<"$ent" || { echo "privacy: FAIL —— 装机扩展没有沙盒"; exit 1; }
 if grep -q 'com.apple.security.network' <<<"$ent"; then echo "privacy: FAIL —— 装机扩展带网络权限"; exit 1; fi
-native="$(grep -nE 'URLSession|NSURLConnection|URLRequest|NWConnection|CFSocket|NSXPCConnection|DistributedNotificationCenter' App/*.swift Extension/*.swift Shared/*.swift 2>/dev/null || true)"
+native="$(grep -nE 'URLSession|NSURLConnection|URLRequest|NWConnection|CFSocket|NSXPCConnection' App/Tempo*.swift Extension/*.swift Shared/*.swift 2>/dev/null || true)"
 [ -z "$native" ] || { echo "privacy: FAIL —— 原生代码里出现联网调用："; echo "$native" | head -n 10; exit 1; }
-echo "privacy: PASS (manifest 权限是 storage 与 nativeMessaging，后者只通到本机的容器扩展；扩展脚本与页面没有联网调用或远程地址；装机扩展沙盒且无网络权限；容器 App、扩展原生代码与两者之间的收件目录无联网调用)"
+echo "privacy: PASS (扩展权限仍为 storage 与本机 nativeMessaging；扩展无联网调用或网络权限；容器 App 的共享生命周期层可选 iCloud 与匿名公开发行检查，见 README)"

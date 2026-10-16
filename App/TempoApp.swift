@@ -8,12 +8,17 @@ let extensionIdentifier = "cyou.tianli.tempo.extension"
 /// Safari lists an extension from outside the App Store only when its app is notarized. Safari's own state
 /// call still answers "not enabled" for a build it has not listed, so this is checked separately.
 func isNotarized() -> Bool {
+    #if APP_STORE
+    // Store distribution is validated by Apple, not Developer ID notarization.
+    return true
+    #else
     var code: SecStaticCode?
     var requirement: SecRequirement?
     guard SecStaticCodeCreateWithPath(Bundle.main.bundleURL as CFURL, [], &code) == errSecSuccess, let code,
           SecRequirementCreateWithString("notarized" as CFString, [], &requirement) == errSecSuccess,
           let requirement else { return false }
     return SecStaticCodeCheckValidity(code, [], requirement) == errSecSuccess
+    #endif
 }
 
 /// `Tempo status [--json]` answers from the command line without opening a window:
@@ -28,6 +33,7 @@ enum Main {
     /// symlink's folder for its bundle and Safari would not accept it as the extension's app, so it starts
     /// itself again at the real path first.
     static func reexecAtRealPath() {
+        #if !APP_STORE
         guard getenv("TEMPO_REEXEC") == nil else { return }
         var size: UInt32 = 0
         _NSGetExecutablePath(nil, &size)
@@ -37,6 +43,7 @@ enum Main {
         guard strcmp(path, real) != 0 else { return }
         setenv("TEMPO_REEXEC", "1", 1)
         execv(real, CommandLine.unsafeArgv)   // returns only on failure; then carry on in place
+        #endif
     }
 
     /// Arguments the system or Xcode may hand to an app it launches: `-psn_0_1234`,
@@ -55,6 +62,22 @@ enum Main {
     }
 
     static func main() {
+        #if !APP_STORE
+        if CommandLine.arguments.dropFirst().first == "--ui-self-test" { TempoBasics.selfTest(); exit(0) }
+        if CommandLine.arguments.dropFirst().first == "--update-source-self-test" { TempoBasics.liveUpdateSelfTest() }
+        if AppLifecycleCLI.handles(CommandLine.arguments.dropFirst().first) {
+            exit(TempoBasics.shared.command(Array(CommandLine.arguments.dropFirst())))
+        }
+        #endif
+        #if APP_STORE
+        let args = Array(CommandLine.arguments.dropFirst())
+        if args == ["--store-self-test"] { StoreSelfTest.run() }
+        guard args.isEmpty || args.first.map(isLaunchFlag) == true else {
+            FileHandle.standardError.write(Data("Tempo App Store edition has no command-line interface. Open the app to manage the Safari extension.\n".utf8))
+            exit(2)
+        }
+        openWindow()
+        #else
         reexecAtRealPath()
         let args = Array(CommandLine.arguments.dropFirst())
         let json = args.contains("--json")
@@ -70,6 +93,7 @@ enum Main {
             }
         case "--help", "-h", "help":
             print(CLI.usage)
+            print(AppLifecycleCLI.help("tempo"))
             exit(0)
         case .some(let word) where !word.hasPrefix("-"):
             CLI.run(args)   // settings commands; an unknown one exits 2
@@ -109,6 +133,7 @@ enum Main {
         while !done && Date() < deadline { RunLoop.main.run(mode: .default, before: Date().addingTimeInterval(0.05)) }
         print(done ? line : "Tempo: Safari did not answer within 8 s")
         exit(code)
+        #endif
     }
 }
 
@@ -124,6 +149,11 @@ struct TempoApp: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        #if !APP_STORE
+        TempoBasics.shared.install()
+        #endif
+    }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
 }
 
@@ -198,6 +228,9 @@ struct ContentView: View {
             Text("版本 \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")")
                 .font(.footnote)
                 .foregroundStyle(.tertiary)
+            #if !APP_STORE
+            Button("设置与更新…") { AppLifecycleUI.shared.show() }
+            #endif
         }
         .padding(22)
         .frame(width: 440)

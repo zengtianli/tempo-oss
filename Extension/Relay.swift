@@ -1,3 +1,4 @@
+#if !APP_STORE
 import Foundation
 import notify
 
@@ -119,3 +120,4 @@ final class Relay {
         Mailbox.write(["pid": Int(getpid()), "at": Date().timeIntervalSince1970, "profiles": profiles.sorted()], to: Mailbox.armed)
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if !APP_STORE
 import AppKit
 import SafariServices
 import notify
@@ -107,3 +108,4 @@ enum Remote {
         return enabled
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if !APP_STORE
 import Foundation
 import JavaScriptCore
 import SQLite3
@@ -112,7 +113,7 @@ enum CLI {
         }
     }
 
-    private static func execute(_ argv: [String]) throws -> Engine.Reply {
+    static func execute(_ argv: [String]) throws -> Engine.Reply {
         let command = argv[0]
         var positionals: [String] = []
         var site: String?
@@ -568,3 +569,4 @@ final class Store {
         return rows
     }
 }
+#endif

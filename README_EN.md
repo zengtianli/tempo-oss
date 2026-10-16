@@ -2,7 +2,7 @@
 
 [中文](README.md) | **English**
 
-[Download the distribution ZIP](https://github.com/zengtianli/tempo-oss/releases/download/v0.1.3/Tempo-0.1.3-mac.zip) · [MIT source snapshot](https://github.com/zengtianli/tempo-oss).
+[Download the distribution ZIP](https://github.com/zengtianli/tempo-oss/releases/download/v0.1.4/Tempo-0.1.4-mac.zip) · [MIT source snapshot](https://github.com/zengtianli/tempo-oss).
 
 Set one playback speed for videos and audio in Safari, adjust it with the keyboard, and remember a speed or disable the extension per site. [Global Speed](https://github.com/polywock/globalSpeed) inspired the features; Tempo provides its own Safari implementation.
 
@@ -15,7 +15,7 @@ Requires macOS 14 or later. Download the Developer ID signed, notarized and stap
 3. Choose which websites it may access. For global speed control, choose Always Allow on Every Website. You must confirm enablement and website permissions yourself.
 4. Reload pages opened before enabling it, then click Tempo in Safari's toolbar to set the speed.
 
-Export settings from the panel before upgrading, close the Tempo host window, and replace the app. Settings remain in Safari; packages contain no author's configuration. There is no automatic updater; download new packages from Releases.
+Export settings from the panel before upgrading, close the Tempo host window, and replace the app. Settings remain in Safari; packages contain no author's configuration. The host app's Settings and Updates window checks the existing public Release manifest and offers check intervals; automatic checks, downloads and installation default to off.
 
 ## Features and shortcuts
 
@@ -103,9 +103,10 @@ This is a one-way allowlisted snapshot of the development repository, excluding 
 
 ## Privacy, limitations and troubleshooting
 
-No network calls or data collection. Website access locates and adjusts media; `storage` holds local settings and `nativeMessaging` communicates only with the local app extension. The optional channel reads the current tab's hostname and media state; requests and replies remain in its sandbox and are removed after reading. Other local programs with access to that directory can send equivalent requests.
+No usage data collection. The web extension makes no network calls. The host app anonymously reads the existing GitHub Release manifest for updates; optional configuration sync uses the system Apple ID and iCloud Drive. Website access locates and adjusts media; `storage` holds local settings and `nativeMessaging` communicates only with the local app extension. The optional channel reads the current tab's hostname and media state; requests and replies remain in its sandbox and are removed after reading. Other local programs with access to that directory can send equivalent requests.
 
-- No iCloud settings sync; use panel export/import between Macs.
+- Optional iCloud settings sync defaults to off. The host's Settings and Updates window synchronizes speed, site rules, media keys and the host refresh key while open, without a persistent background process. The command channel and Safari permissions remain local. Panel export/import remains available between Macs.
+- `tempo config status --json`, `tempo config export -o file`, `tempo config import file --yes`, `tempo config sync on|off --yes`, `tempo update check --json` and `tempo update options --json` share the native window's implementation. The host refresh shortcut defaults to Command-R and can be disabled or changed without taking system editing shortcuts.
 - No per-tab pinned speed, audio effects or video filters; macOS Safari only.
 - Missing extension: check notarization and that the app is in Applications.
 - Inactive shortcuts: check enablement and website access, reload, and leave text fields.
