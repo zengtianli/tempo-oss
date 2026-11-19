@@ -15,6 +15,8 @@ let resources = URL(fileURLWithPath: args[1])
 let tests = URL(fileURLWithPath: args[2])
 let out = URL(fileURLWithPath: args[3])
 let store = args.firstIndex(of: "--store").flatMap { args.indices.contains($0 + 1) ? args[$0 + 1] : nil } ?? "{}"
+let language = args.firstIndex(of: "--language").flatMap { args.indices.contains($0 + 1) ? args[$0 + 1] : nil } ?? "zh-Hans"
+let messages = try String(contentsOf: resources.appendingPathComponent("_locales/\(language == "en" ? "en" : "zh_CN")/messages.json"), encoding: .utf8)
 
 func spin(_ seconds: TimeInterval, until done: () -> Bool = { false }) {
     let end = Date().addingTimeInterval(seconds)
@@ -27,7 +29,7 @@ NSApplication.shared.appearance = NSAppearance(named: args.contains("--dark") ? 
 let config = WKWebViewConfiguration()
 let shim = (try? String(contentsOf: tests.appendingPathComponent("shim.js"), encoding: .utf8)) ?? ""
 let seed = "document.dispatchEvent(new CustomEvent('tempo-test:set', { detail: \(String(reflecting: store)) }));"
-config.userContentController.addUserScript(WKUserScript(source: shim + "\n" + seed, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+config.userContentController.addUserScript(WKUserScript(source: "globalThis.__tempoLanguage = \(String(reflecting: language)); globalThis.__tempoMessages = \(messages);\n" + shim + "\n" + seed, injectionTime: .atDocumentStart, forMainFrameOnly: true))
 
 let web = WKWebView(frame: NSRect(x: 0, y: 0, width: 304, height: 900), configuration: config)
 web.appearance = NSApplication.shared.appearance
@@ -57,4 +59,24 @@ web.takeSnapshot(with: snapshot) { image, error in
     print("wrote \(out.path) \(Int(image.size.width))x\(Int(image.size.height))")
 }
 spin(10) { finished }
-exit(finished ? 0 : 1)
+guard finished else { exit(1) }
+if args.contains("--verify-localization") {
+    var report: String?
+    var failure: String?
+    let script = try String(contentsOf: tests.appendingPathComponent("localization.js"), encoding: .utf8)
+    web.callAsyncJavaScript(script, arguments: ["language": language], in: nil, in: .page) { result in
+        switch result {
+        case .success(let value): report = value as? String
+        case .failure(let error): failure = error.localizedDescription
+        }
+    }
+    spin(15) { report != nil || failure != nil }
+    guard let report, let data = report.data(using: .utf8),
+          let result = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+        print("localization checks failed: \(failure ?? "no result")"); exit(1)
+    }
+    try data.write(to: out.deletingPathExtension().appendingPathExtension("json"))
+    guard result["ok"] as? Bool == true else { print(report); exit(1) }
+    print("localization checks passed: \(language)")
+}
+exit(0)

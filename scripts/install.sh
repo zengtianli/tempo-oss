@@ -5,10 +5,10 @@
 #
 # A build that is not notarized is refused: Safari does not list its extension, so the install would look
 # like it did nothing. --unnotarized installs it anyway, for use with Safari's "Allow unsigned extensions".
-# ~/.local/bin/tempo is a symlink to the app's executable (the app restarts itself at its real path, so
-# it still finds its bundle). An existing entry that is not ours is left alone.
-# An installed copy is moved to ~/.Trash/tempo-<old version>-<time>/ first. Nothing is launched and Safari
-# is not restarted: a new install shows up under Safari Settings > Extensions, and an upgrade is picked up
+# ~/.local/bin/tempo execs the app's real executable path: lifecycle commands run before the app's
+# symlink reexec and would otherwise see bundle version 0. An entry that is not ours is left alone.
+# An installed copy is moved to ~/.Trash/tempo-<old version>-<time>/ first. An open Tempo.app is quit first and
+# reopened in the background afterwards; otherwise nothing is launched. Safari is not restarted: a new install shows up under Safari Settings > Extensions, and an upgrade is picked up
 # the next time Safari starts.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -22,6 +22,11 @@ for arg in "$@"; do
     *) [ -z "$APP" ] || usage; APP="$arg" ;;
   esac
 done
+# Chapter's install-channel guard runs where Chapter is (the development Mac; there a missing `chapter` command still
+# stops the install). A public checkout has no Chapter and skips it.
+CHAPTER_GUARD=0
+[ -d "$HOME/Apps/chapter" ] && CHAPTER_GUARD=1
+[ "$CHAPTER_GUARD" = 0 ] || chapter local-install check --app tempo --direct --json
 APP="${APP:-$PWD/build/Tempo.app}"
 DEST=/Applications/Tempo.app
 APPEX="Contents/PlugIns/TempoExtension.appex"
@@ -38,8 +43,14 @@ if [ "$UNNOTARIZED" != 1 ] && ! codesign --verify --test-requirement='=notarized
   exit 1
 fi
 
-if pgrep -f "^$DEST/Contents/MacOS/Tempo" >/dev/null; then
-  echo 'Tempo.app is open. Close its window and run this again.' >&2
+# 装前强退、装完后台重开，走共享 app_replace（本人 2026-10-23；Chapter 装机已在外层套上，直接运行本脚本时这里接上）。
+# Without it (a public checkout) an open Tempo.app is refused, as before.
+REPLACE="$HOME/Dev/tools/dev/lib/tools/macapp/app_replace.py"
+REPLACE_STATE="$(mktemp -t tempo-replace)"
+if [ -f "$REPLACE" ]; then
+  python3 "$REPLACE" stop "$DEST" --state "$REPLACE_STATE" || { echo 'Tempo.app did not quit; nothing was installed.' >&2; exit 1; }
+elif pgrep -f "^$DEST/Contents/MacOS/Tempo" >/dev/null; then
+  echo 'Tempo.app is open. Quit it and run this again.' >&2
   exit 1
 fi
 
@@ -54,25 +65,32 @@ if [ -e "$DEST" ]; then
   OLD="$(defaults read "$DEST/Contents/Info" CFBundleShortVersionString 2>/dev/null || echo unknown)"
   BACKUP="$HOME/.Trash/tempo-$OLD-$(date +%Y%m%d-%H%M%S)"
   mkdir -p "$BACKUP"
-  mv "$DEST" "$BACKUP/"
+  if [ -O "$DEST" ]; then
+    mv "$DEST" "$BACKUP/"
+  else
+    # Apple's TestFlight installer owns its app as root. Reuse the authorized exact sudo entry.
+    "$HOME/.local/bin/mac-admin" run -- /bin/mv "$DEST" "$BACKUP/"
+  fi
   echo "previous copy moved to $BACKUP"
 fi
 
 ditto "$APP" "$DEST"
+[ "$CHAPTER_GUARD" = 0 ] || chapter local-install check --app tempo --direct --require-installed --json
 codesign --verify --deep --strict "$DEST"
 "$LSREGISTER" -f -R -trusted "$DEST"
 pluginkit -a "$DEST/$APPEX"
 
 LINK="$HOME/.local/bin/tempo"
 CLI_TARGET="$DEST/Contents/MacOS/Tempo"
-# 0.1.0 installed a two-line wrapper script here; it is ours and is replaced by the symlink.
+# Use the same minimal real-path wrapper as 0.1.0; no copied product logic lives here.
 OLD_WRAPPER='#!/bin/sh
 exec /Applications/Tempo.app/Contents/MacOS/Tempo "$@"'
-if [ -f "$LINK" ] && [ ! -L "$LINK" ] && [ "$(cat "$LINK")" = "$OLD_WRAPPER" ]; then rm "$LINK"; fi
+if [ -L "$LINK" ] && [ "$(readlink "$LINK")" = "$CLI_TARGET" ]; then rm "$LINK"; fi
 if [ ! -e "$LINK" ] && [ ! -L "$LINK" ]; then
   mkdir -p "$(dirname "$LINK")"
-  ln -s "$CLI_TARGET" "$LINK"
-elif [ "$(readlink "$LINK" || true)" != "$CLI_TARGET" ]; then
+  printf '%s\n' "$OLD_WRAPPER" > "$LINK"
+  chmod 755 "$LINK"
+elif [ -L "$LINK" ] || [ ! -f "$LINK" ] || [ "$(cat "$LINK")" != "$OLD_WRAPPER" ]; then
   echo "Existing CLI entry left as it is; inspect it before replacing: $LINK" >&2
 fi
 
@@ -81,6 +99,8 @@ if [ -f keys.json ]; then
   ln -sfn "$PWD/keys.json" "$HOME/.config/mackit/keys.d/tempo.json"
 fi
 echo "installed $(defaults read "$DEST/Contents/Info" CFBundleShortVersionString) to $DEST"
+[ -f "$REPLACE" ] && python3 "$REPLACE" reopen "$DEST" --state "$REPLACE_STATE"
+rm -f "$REPLACE_STATE"
 pluginkit -m -v -i cyou.tianli.tempo.extension || true
 if [ "$SAVED" = 1 ] && ! "$DEST/Contents/MacOS/Tempo" show >/dev/null 2>&1; then
   echo "Safari dropped Tempo's stored settings during this install. They were saved to $SETTINGS." >&2

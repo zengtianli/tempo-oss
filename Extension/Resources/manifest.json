@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Tempo · 倍速",
-  "description": "给所有网页视频和音频设一个播放速度：全局生效，键盘加速减速，可按网站单独记住。",
-  "version": "0.1.4",
+  "name": "__MSG_extension_name__",
+  "description": "__MSG_extension_description__",
+  "default_locale": "en",
+  "version": "0.1.5",
   "icons": {
     "48": "images/icon-48.png",
     "96": "images/icon-96.png",
@@ -32,7 +33,7 @@
     }
   ],
   "action": {
-    "default_title": "Tempo · 倍速",
+    "default_title": "__MSG_extension_name__",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "images/toolbar-16.png",

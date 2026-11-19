@@ -4,6 +4,23 @@
   const api = globalThis.browser || globalThis.chrome;
   const T = globalThis.Tempo;
   const $ = (id) => document.getElementById(id);
+  const message = (key, substitutions) => api.i18n.getMessage(key, substitutions);
+
+  function localize() {
+    document.documentElement.lang = api.i18n.getUILanguage();
+    for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = message(el.dataset.i18n);
+    for (const attr of ['title', 'placeholder', 'aria-label']) {
+      for (const el of document.querySelectorAll(`[data-i18n-${attr}]`)) {
+        el.setAttribute(attr, message(el.getAttribute(`data-i18n-${attr}`)));
+      }
+    }
+  }
+
+  // Keep shared.js key names unchanged: the CLI consumes that same formatter.
+  function keyLabel(combo) {
+    return T.label(combo).replace(T.label('Space'), message('key_space'))
+      .replace(T.label('Numpad'), message('key_numpad') + ' ');
+  }
 
   let cfg = T.normalize({});
   let host = '';
@@ -29,7 +46,8 @@
 
     $('site').hidden = !host;
     if (host) {
-      $('host').textContent = s.rule ? `${s.rule[0]} · 单独速度 ${T.fmt(s.rule[1])}` : `${host} · 跟随全局速度`;
+      $('host').textContent = s.rule ? message('site_custom_speed', [s.rule[0], T.fmt(s.rule[1])]) : message('site_global_speed', host);
+      $('host').title = $('host').textContent;
       $('siteRule').checked = !!s.rule;
       $('siteOff').checked = s.siteOff;
     }
@@ -37,7 +55,7 @@
     for (const b of $('keys').querySelectorAll('button')) {
       const on = listening === b.dataset.action;
       b.classList.toggle('listening', on);
-      b.textContent = on ? '按下按键…' : T.label(cfg.keys[b.dataset.action]);
+      b.textContent = on ? message('shortcut_listening') : keyLabel(cfg.keys[b.dataset.action]);
     }
     if (document.activeElement !== $('step')) $('step').value = cfg.step;
     if (document.activeElement !== $('seek')) $('seek').value = cfg.seek;
@@ -53,11 +71,12 @@
       b.addEventListener('click', () => setSpeed(v));
       $('presets').appendChild(b);
     }
-    for (const [action, name] of T.ACTIONS) {
+    for (const [action] of T.ACTIONS) {
       const span = document.createElement('span');
-      span.textContent = name;
+      span.textContent = message('action_' + action);
       const b = document.createElement('button');
       b.dataset.action = action;
+      b.setAttribute('aria-label', message('shortcut_for_action', span.textContent));
       b.addEventListener('click', () => { listening = listening === action ? null : action; render(); });
       $('keys').append(span, b);
     }
@@ -67,8 +86,7 @@
     const { patch, freed } = T.bindPatch(cfg, action, combo);
     listening = null;
     save(patch);
-    const name = freed && T.ACTIONS.find(([a]) => a === freed)[1];
-    note(freed ? `${T.label(combo)} 原来用于“${name}”，已改到这里。` : '');
+    note(freed ? message('shortcut_reassigned', [keyLabel(combo), message('action_' + freed)]) : '');
   }
 
   function onKeyDown(e) {
@@ -105,37 +123,38 @@
       $('io').hidden = false;
       $('io').value = text;
       $('io').select();
-      try { await navigator.clipboard.writeText(text); note('配置已复制到剪贴板，也显示在上面。'); }
-      catch { note('配置显示在上面，全选后复制保存。'); }
+      try { await navigator.clipboard.writeText(text); note(message('export_copied')); }
+      catch { note(message('export_copy_manually')); }
     });
     $('import').addEventListener('click', async () => {
       if ($('io').hidden || !$('io').value.trim()) {
         $('io').hidden = false;
         $('io').value = '';
         $('io').focus();
-        return note('粘贴配置后再点一次“导入配置”。');
+        return note(message('import_prompt'));
       }
       let raw;
-      try { raw = JSON.parse($('io').value); } catch { return note('这段内容不是有效的配置，原配置没有改动。'); }
-      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return note('这段内容不是有效的配置，原配置没有改动。');
+      try { raw = JSON.parse($('io').value); } catch { return note(message('import_invalid')); }
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return note(message('import_invalid'));
       await save(T.normalize(raw));
-      note('已导入。');
+      note(message('import_done'));
     });
     $('defaults').addEventListener('click', async () => {
       if (Date.now() - confirmReset > 4000) {
         confirmReset = Date.now();
-        return note('再点一次“恢复默认”确认：速度、网站规则和快捷键都会回到初始值。');
+        return note(message('defaults_confirm'));
       }
       confirmReset = 0;
       await api.storage.local.clear();
       cfg = T.normalize({});
       render();
-      note('已恢复默认。');
+      note(message('defaults_done'));
     });
     document.addEventListener('keydown', onKeyDown, true);
   }
 
   async function init() {
+    localize();
     build();
     wire();
     try { cfg = T.normalize(await api.storage.local.get(null)); } catch {}

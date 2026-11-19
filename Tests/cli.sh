@@ -8,9 +8,10 @@
 # `tempo page` and `tempo do` are run against a mailbox in the same temporary folder (TEMPO_REMOTE_DIR, with
 # a notification name of its own, TEMPO_REMOTE_TAG). Safari's side of it is Tests/standin.swift: the app
 # extension's real relay with the background page played from a table of answers. "Is Safari running" is
-# asked about an app that always is, or one that never is (TEMPO_SAFARI_BUNDLE). The real Safari and the
+# asked about an app that always is (the Dock — not Finder, which can be quit), or one that never is (TEMPO_SAFARI_BUNDLE). The real Safari and the
 # installed extension's mailbox are never touched; every command below runs with these variables set.
 set -euo pipefail
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"   # 统一用 uv 跑 Python（不用系统自带的 3.9）
 cd "$(dirname "$0")/.."
 
 CLI=build/tests/tempo-cli
@@ -26,13 +27,13 @@ fi
 
 WORK="$(mktemp -d "${TMPDIR:-/tmp}/tempo-cli.XXXXXX")"
 trap 'rm -rf "$WORK"' EXIT
-TEMPO_CLI="$PWD/$CLI" TEMPO_RELAY="$PWD/$RELAY" TEMPO_RESOURCES="$PWD/Extension/Resources" TEMPO_WORK="$WORK" /usr/bin/python3 - <<'PY'
+TEMPO_CLI="$PWD/$CLI" TEMPO_RELAY="$PWD/$RELAY" TEMPO_RESOURCES="$PWD/Extension/Resources" TEMPO_WORK="$WORK" uv run --no-project --quiet --python '>=3.12' python - <<'PY'
 import json, os, sqlite3, subprocess, sys, time
 
 cli, relay, work = os.environ["TEMPO_CLI"], os.environ["TEMPO_RELAY"], os.environ["TEMPO_WORK"]
 store = os.path.join(work, "LocalStorage.db")
 mailbox = os.path.join(work, "remote")
-REMOTE = {"TEMPO_REMOTE_DIR": mailbox, "TEMPO_REMOTE_TAG": f".test.{os.getpid()}", "TEMPO_SAFARI_BUNDLE": "com.apple.finder"}
+REMOTE = {"TEMPO_REMOTE_DIR": mailbox, "TEMPO_REMOTE_TAG": f".test.{os.getpid()}", "TEMPO_SAFARI_BUNDLE": "com.apple.dock"}  # Dock is always running in a login session; Finder can be quit
 failed = 0
 
 
@@ -202,8 +203,12 @@ check("status keeps its own shape (this test build is not notarized: exit 3)",
 rc, _, out, _ = run("--help")
 listed = [line.split()[1] for line in out.splitlines() if line.strip().startswith("tempo ")]
 check("--help lists every command at the start of a line, and the four things an agent needs",
-      rc == 0 and set(listed) == {"status", "show", "page", "keys", "export", "speed", "on", "site", "set", "bind", "import", "defaults", "do", "config", "update"}
+      rc == 0 and set(listed) == {"status", "show", "page", "keys", "export", "feed", "speed", "on", "site", "set", "bind", "import", "defaults", "do", "config", "update"}
       and "tempo on | off" in out and all(word in out for word in ("读命令", "写命令", "--json 输出", "退出码", "仅在窗口中", "命令通道")), listed)
+# `feed` reads a release record with the app's own parser; this plain test build has no Info.plist, so no HTTPS address.
+rc, body, _, _ = run("feed", os.path.join(work, "latest.json"), "--json")
+check("feed in a build without a registered HTTPS update address says so: exit 1",
+      rc == 1 and body.get("ok") is False and "AppUpdateFeedURL" in body.get("error", ""), f"exit {rc} {body}")
 
 # The page in Safari's current tab: `page`, `do`, and write commands telling open pages to read again.
 # Nobody is listening yet: the mailbox folder does not even exist.

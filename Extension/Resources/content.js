@@ -6,6 +6,7 @@
   const T = globalThis.Tempo;
   if (!T || !api || !api.runtime || !api.runtime.id || window.__tempoContent) return;
   window.__tempoContent = true;
+  const message = (key, substitutions) => api.i18n.getMessage(key, substitutions);
 
   const IN = 'tempo:to-engine';
   const OUT = 'tempo:from-engine';
@@ -208,7 +209,7 @@
       case 'slower': case 'faster': case 'reset': return setSpeed(T.target(cfg, host, action));
       case 'toggle':
         save({ enabled: !cfg.enabled });
-        return indicate(cfg.enabled ? T.fmt(T.state(cfg, host).speed) : '已关闭');
+        return indicate(cfg.enabled ? T.fmt(T.state(cfg, host).speed) : message('indicator_off'));
       case 'rewind': return media('seek', -cfg.seek);
       case 'forward': return media('seek', cfg.seek);
       case 'framePrev': return media('frame', -1);
@@ -228,12 +229,12 @@
     const r = m.result;
     if (!r) return;
     switch (m.name) {
-      case 'seek': return show((m.value > 0 ? '» ' : '« ') + Math.abs(m.value) + ' 秒');
-      case 'frame': return show(m.value > 0 ? '下一帧' : '上一帧');
-      case 'pause': return show(r.paused ? '暂停' : '播放');
-      case 'mute': return show(r.muted ? '静音' : '取消静音');
-      case 'mark': return show('已记下 ' + clock(r.time));
-      case 'jump': return show(r.time == null ? '还没有记下位置' : '回到 ' + clock(r.time));
+      case 'seek': return show(message('indicator_seek', [m.value > 0 ? '»' : '«', String(Math.abs(m.value))]));
+      case 'frame': return show(message(m.value > 0 ? 'action_frameNext' : 'action_framePrev'));
+      case 'pause': return show(message(r.paused ? 'indicator_paused' : 'indicator_playing'));
+      case 'mute': return show(message(r.muted ? 'indicator_muted' : 'indicator_unmuted'));
+      case 'mark': return show(message('indicator_marked', clock(r.time)));
+      case 'jump': return show(r.time == null ? message('indicator_no_mark') : message('indicator_jumped', clock(r.time)));
     }
   }
 

@@ -1,0 +1,694 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "1× / Previous speed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1× / Previous speed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1× / 上次速度"
+          }
+        }
+      }
+    },
+    "App Shortcuts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Shortcuts"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本 App 快捷键"
+          }
+        }
+      }
+    },
+    "Check the settings and try again. Your saved settings are unchanged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check the settings and try again. Your saved settings are unchanged."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请检查设置后重试，原设置保留。"
+          }
+        }
+      }
+    },
+    "Checking status…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking status…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在读取状态…"
+          }
+        }
+      }
+    },
+    "Could not apply settings to Safari. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not apply settings to Safari. %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配置未写入 Safari。%@"
+          }
+        }
+      }
+    },
+    "Default Shortcuts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Default Shortcuts"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "默认快捷键"
+          }
+        }
+      }
+    },
+    "Enable Tempo in Safari Settings → Extensions, then set website access to “Always Allow on Every Website.”": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable Tempo in Safari Settings → Extensions, then set website access to “Always Allow on Every Website.”"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 Safari 设置的“扩展”里勾选 Tempo，并把网站权限设为“在所有网站上始终允许”。"
+          }
+        }
+      }
+    },
+    "Enabled in Safari": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enabled in Safari"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已在 Safari 中启用"
+          }
+        }
+      }
+    },
+    "Enter a playback speed from 0.1 to 16.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a playback speed from 0.1 to 16."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请输入 0.1–16 之间的播放速度。"
+          }
+        }
+      }
+    },
+    "If shortcuts do not respond, click Tempo in Safari’s toolbar on the video page, choose “Always Allow on Every Website,” then reload the page.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If shortcuts do not respond, click Tempo in Safari’s toolbar on the video page, choose “Always Allow on Every Website,” then reload the page."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按键没反应时：在视频页点工具栏上的 Tempo 图标，选“始终允许在每个网站上”，再刷新页面。"
+          }
+        }
+      }
+    },
+    "In Safari’s Tempo toolbar panel, open Shortcuts & Settings. The tempo keys and bind commands use the same settings.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Safari’s Tempo toolbar panel, open Shortcuts & Settings. The tempo keys and bind commands use the same settings."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari 工具栏 Tempo → 快捷键与设置；tempo keys / bind 读写同一份配置。"
+          }
+        }
+      }
+    },
+    "Media shortcuts": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Media shortcuts"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "媒体快捷键"
+          }
+        }
+      }
+    },
+    "Not enabled in Safari": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not enabled in Safari"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有在 Safari 中启用"
+          }
+        }
+      }
+    },
+    "Not saved. Your previous settings are unchanged. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not saved. Your previous settings are unchanged. %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未保存；原设置保留。%@"
+          }
+        }
+      }
+    },
+    "On-page speed indicator": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On-page speed indicator"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "页面速度提示"
+          }
+        }
+      }
+    },
+    "Open Safari Extension Settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Safari Extension Settings"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开 Safari 扩展设置"
+          }
+        }
+      }
+    },
+    "Open Tempo’s panel in Safari and change a setting to create its settings store.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Tempo’s panel in Safari and change a setting to create its settings store."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在 Safari 的 Tempo 面板里改一项设置，以创建设置存储。"
+          }
+        }
+      }
+    },
+    "Playback speed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback speed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放速度"
+          }
+        }
+      }
+    },
+    "Refresh status in Tempo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh status in Tempo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刷新状态（只在 Tempo 内）"
+          }
+        }
+      }
+    },
+    "Return to saved position": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Return to saved position"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回到记下的位置"
+          }
+        }
+      }
+    },
+    "Safari Playback": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari Playback"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari 播放设置"
+          }
+        }
+      }
+    },
+    "Safari settings are not ready. %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari settings are not ready. %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari 设置未就绪。%@"
+          }
+        }
+      }
+    },
+    "Safari’s settings format has changed. Update Tempo before trying again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari’s settings format has changed. Update Tempo before trying again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safari 的设置存储格式变了，请更新 Tempo 后重试。"
+          }
+        }
+      }
+    },
+    "Save Shortcut": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save Shortcut"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存 ⌘ 快捷键"
+          }
+        }
+      }
+    },
+    "Save Speed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save Speed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存播放速度"
+          }
+        }
+      }
+    },
+    "Save playback position": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save playback position"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "记下位置"
+          }
+        }
+      }
+    },
+    "Seek backward": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seek backward"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快退"
+          }
+        }
+      }
+    },
+    "Seek forward": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seek forward"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快进"
+          }
+        }
+      }
+    },
+    "Set one playback speed for video and audio across Safari.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set one playback speed for video and audio across Safari."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "给 Safari 里所有网页视频和音频设一个播放速度。"
+          }
+        }
+      }
+    },
+    "Settings…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置…"
+          }
+        }
+      }
+    },
+    "Shared with Safari’s Tempo panel. Speed range: 0.1–16×.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shared with Safari’s Tempo panel. Speed range: 0.1–16×."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "与 Safari 面板共用配置；速度 0.1–16×"
+          }
+        }
+      }
+    },
+    "Shortcut not saved. Choose an unused ⌘ shortcut with one letter or number. Your previous shortcut is unchanged.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcut not saved. Choose an unused ⌘ shortcut with one letter or number. Your previous shortcut is unchanged."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快捷键未保存。请选用尚未占用的 ⌘ 加单个字母或数字；原快捷键保留。"
+          }
+        }
+      }
+    },
+    "Shortcuts work on pages with video or audio while you are not typing. Customize them in Tempo’s toolbar panel.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shortcuts work on pages with video or audio while you are not typing. Customize them in Tempo’s toolbar panel."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "页面里有视频或音频、且没有在输入文字时生效；可在工具栏的 Tempo 面板里改键。"
+          }
+        }
+      }
+    },
+    "Slow down": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slow down"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "减速"
+          }
+        }
+      }
+    },
+    "Speed up": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speed up"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加速"
+          }
+        }
+      }
+    },
+    "Step through frames": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Step through frames"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "逐帧"
+          }
+        }
+      }
+    },
+    "Tempo": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tempo"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tempo · 倍速"
+          }
+        }
+      }
+    },
+    "Tempo cannot access Safari’s settings. Check Full Disk Access in System Settings, then try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tempo cannot access Safari’s settings. Check Full Disk Access in System Settings, then try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tempo 读不到 Safari 设置。请检查系统设置中的“完全磁盘访问权限”后重试。"
+          }
+        }
+      }
+    },
+    "Tempo could not load its settings engine. Reinstall Tempo, then try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tempo could not load its settings engine. Reinstall Tempo, then try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tempo 无法载入设置引擎，请重新安装 Tempo 后重试。"
+          }
+        }
+      }
+    },
+    "This build has not been notarized by Apple, so Safari will not list the extension. Install a notarized version.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This build has not been notarized by Apple, so Safari will not list the extension. Install a notarized version."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这一版没有经过苹果公证，Safari 不会把它列在“扩展”里。请装公证过的版本。"
+          }
+        }
+      }
+    },
+    "Unable to check the extension. Open Safari, then try again.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unable to check the extension. Open Safari, then try again."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "读不到扩展状态，请先打开一次 Safari 后重试。"
+          }
+        }
+      }
+    },
+    "Version %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本 %@"
+          }
+        }
+      }
+    },
+    "⌘ + a letter or number": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘ + a letter or number"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⌘ 加字母或数字"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

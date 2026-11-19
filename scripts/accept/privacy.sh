@@ -15,10 +15,11 @@ hits="$(grep -nE 'fetch\(|XMLHttpRequest|WebSocket|sendBeacon|EventSource|import
 # The part that runs inside Safari is the extension: it must be sandboxed and carry no network entitlement.
 # (The container app shows status, opens Safari's settings and reads or writes that same store from the
 # command line; it talks to nobody either, and its sources are scanned below.)
-appex=/Applications/Tempo.app/Contents/PlugIns/TempoExtension.appex
+# The extension of the app under test: Chapter's candidate (SOP_INSTALLED_APP), else the installed copy.
+appex="${SOP_INSTALLED_APP:-/Applications/Tempo.app}/Contents/PlugIns/TempoExtension.appex"
 ent="$(codesign -d --entitlements :- "$appex" 2>/dev/null || true)"
-grep -q 'com.apple.security.app-sandbox' <<<"$ent" || { echo "privacy: FAIL —— 装机扩展没有沙盒"; exit 1; }
-if grep -q 'com.apple.security.network' <<<"$ent"; then echo "privacy: FAIL —— 装机扩展带网络权限"; exit 1; fi
+grep -q 'com.apple.security.app-sandbox' <<<"$ent" || { echo "privacy: FAIL —— 被测扩展没有沙盒"; exit 1; }
+if grep -q 'com.apple.security.network' <<<"$ent"; then echo "privacy: FAIL —— 被测扩展带网络权限"; exit 1; fi
 native="$(grep -nE 'URLSession|NSURLConnection|URLRequest|NWConnection|CFSocket|NSXPCConnection' App/Tempo*.swift Extension/*.swift Shared/*.swift 2>/dev/null || true)"
 [ -z "$native" ] || { echo "privacy: FAIL —— 原生代码里出现联网调用："; echo "$native" | head -n 10; exit 1; }
 echo "privacy: PASS (扩展权限仍为 storage 与本机 nativeMessaging；扩展无联网调用或网络权限；容器 App 的共享生命周期层可选 iCloud 与匿名公开发行检查，见 README)"

@@ -67,7 +67,9 @@ for url in [tests.appendingPathComponent("shim.js"),
             resources.appendingPathComponent("shared.js"),
             resources.appendingPathComponent("engine.js"),
             resources.appendingPathComponent("content.js")] {
-    scripts.addUserScript(WKUserScript(source: read(url), injectionTime: .atDocumentStart, forMainFrameOnly: false, in: world))
+    let messages = read(resources.appendingPathComponent("_locales/zh_CN/messages.json"))
+    let source = url.lastPathComponent == "shim.js" ? "globalThis.__tempoMessages = \(messages);\n" + read(url) : read(url)
+    scripts.addUserScript(WKUserScript(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: false, in: world))
 }
 
 // The background page is not a content script; it only shares this view as a place to run.

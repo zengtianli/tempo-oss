@@ -27,6 +27,7 @@ enum CLI {
                                                 对着的那个页面），以及页面里视频或音频此刻的状态
           tempo keys [--json]                   每个动作当前绑的键（面板“快捷键与设置”里的列表）
           tempo export [--json]                 导出配置，文本与面板“导出配置”相同
+          tempo feed <latest.json> [--json]     发布前用本 App 自己的解析读一份 HTTPS 更新记录（不联网、不安装）
 
         写命令（写的是扩展自己的存储，规则用扩展的 shared.js）：
           tempo speed <0.1–16|up|down|toggle> [--site 网站] [--json]

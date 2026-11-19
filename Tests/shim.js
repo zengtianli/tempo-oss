@@ -18,6 +18,15 @@
   }
 
   globalThis.browser = {
+    i18n: {
+      getUILanguage: () => globalThis.__tempoLanguage || 'zh-CN',
+      getMessage: (key, substitutions = []) => {
+        const entry = globalThis.__tempoMessages?.[key];
+        const value = (entry?.message || '').replace(/\$([a-z_]+)\$/gi, (_, name) => entry.placeholders?.[name.toLowerCase()]?.content || '');
+        const items = Array.isArray(substitutions) ? substitutions : [substitutions];
+        return value.replace(/\$(\d+)/g, (_, n) => items[Number(n) - 1] ?? '');
+      },
+    },
     runtime: {
       id: 'tempo-test',
       sendMessage: (m) => { sent.push(m); return Promise.resolve(m.t === 'hello' ? { has: false } : undefined); },
@@ -39,6 +48,11 @@
       onChanged: { addListener: (f) => changeListeners.push(f) },
     },
   };
+
+  // Export tests must never access the user's shared clipboard.
+  Object.defineProperty(navigator, 'clipboard', {value: {writeText: async () => {
+    if (!globalThis.__tempoClipboardAllowed) throw new Error('isolated clipboard denied');
+  }}, configurable: true});
 
   document.addEventListener('tempo-test:set', (e) => apply(JSON.parse(e.detail)));
   // A write that raises no change event, the way one made from outside Safari (the `tempo` command) arrives.

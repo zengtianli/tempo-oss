@@ -15,8 +15,8 @@ final class TempoBasics: NSObject {
     let refreshToggle = NSSwitch()
     let refreshKey = NSTextField(string: "r")
     let refreshDescription = AppLifecycleUI.detailLabel()
-    let save = NSButton(title: "保存播放速度", target: nil, action: nil)
-    let saveKey = NSButton(title: "保存 ⌘ 快捷键", target: nil, action: nil)
+    let save = NSButton(title: String(localized: "Save Speed"), target: nil, action: nil)
+    let saveKey = NSButton(title: String(localized: "Save Shortcut"), target: nil, action: nil)
     var refreshCount = 0
     var applyError: Error?
     private var storeWatch: DispatchSourceFileSystemObject?
@@ -24,9 +24,12 @@ final class TempoBasics: NSObject {
     var source: AppUpdateSource {
         let env = ProcessInfo.processInfo.environment
         if env["APP_LIFECYCLE_SUPPORT_DIR"] != nil && env["TEMPO_BASICS_LIVE_UPDATES"] != "1" { return .privateCloud(channel: "isolated") }
-        // Existing anonymous Release asset, no API token/rate-limit dependency and an exact build number.
-        return .manifest(Self.publicManifest)
+        return Self.productionSource
     }
+    /// Direct distribution reads the HTTPS feed registered in Info.plist (AppUpdateFeedURL, written from project.yml),
+    /// so another Mac needs no iCloud or account; a build without it keeps the private iCloud default channel.
+    static var productionSource: AppUpdateSource { AppUpdateFeed.source(fallback: .privateCloud(channel: "default")) }
+    static var bundleID: String { Bundle.main.bundleIdentifier ?? "cyou.tianli.tempo" }
     override init() {
         let env = ProcessInfo.processInfo.environment
         if let suite = env["TEMPO_BASICS_SUITE"], suite != Bundle.main.bundleIdentifier { defaults = UserDefaults(suiteName: suite)! }
@@ -46,7 +49,7 @@ final class TempoBasics: NSObject {
         super.init()
         configuration.onChange = { [weak self] in
             guard let self else { return }
-            do { try self.apply(); self.refresh() } catch { self.applyError = error; self.message.stringValue = "配置未写入 Safari：\(error.localizedDescription)" }
+            do { try self.apply(); self.refresh() } catch { self.applyError = error; self.message.stringValue = String(localized: "Could not apply settings to Safari. \(Self.guiError(error))") }
         }
         save.target = self; save.action = #selector(saveSpeed)
         indicator.target = self; indicator.action = #selector(saveIndicator)
@@ -108,7 +111,8 @@ final class TempoBasics: NSObject {
         try? capture()
         AppLifecycleUI.shared.productGroups = { [weak self] in self?.groups() ?? [] }
         AppLifecycleUI.shared.willShow = { [weak self] in self?.refresh() }
-        AppLifecycleUI.install(name: "Tempo · 倍速", configuration: configuration, updateSource: source)
+        AppUpdateFeed.seedDailyCheck(bundleID: Self.bundleID)  // first open: check daily while the window app runs; a changed choice stays
+        AppLifecycleUI.install(name: String(localized: "Tempo"), configuration: configuration, updateSource: source)
         AppLifecycleCLI.follow(configuration)
         shortcuts.installMenu()
         // Event driven and limited to the window app's lifetime: no daemon, timer or Safari launch.
@@ -117,7 +121,7 @@ final class TempoBasics: NSObject {
             if fd >= 0 {
                 let watch = DispatchSource.makeFileSystemObjectSource(fileDescriptor: fd, eventMask: [.write, .rename], queue: .main)
                 watch.setEventHandler { [weak self] in
-                    guard let self else { return }; do { try self.capture(); self.configuration.reconcile() } catch { self.message.stringValue = error.localizedDescription }
+                    guard let self else { return }; do { try self.capture(); self.configuration.reconcile() } catch { self.message.stringValue = Self.guiError(error) }
                 }
                 watch.setCancelHandler { close(fd) }; watch.resume(); storeWatch = watch
             }
@@ -128,36 +132,56 @@ final class TempoBasics: NSObject {
         refreshKey.widthAnchor.constraint(equalToConstant: 50).isActive = true
         let edit = NSStackView(views: [speed, save]); edit.spacing = 8
         let key = NSStackView(views: [refreshKey, saveKey]); key.spacing = 8
-        return [AppLifecycleUI.group("Safari 播放设置", rows: [
-            AppLifecycleUI.row("播放速度", detail: message, accessory: edit),
-            AppLifecycleUI.row("页面速度提示", accessory: indicator),
-            AppLifecycleUI.row("媒体快捷键", detail: AppLifecycleUI.detailLabel("Safari 工具栏 Tempo → 快捷键与设置；tempo keys / bind 读写同一份配置。"))]),
-            AppLifecycleUI.group("本 App 快捷键", rows: [
-                AppLifecycleUI.row("刷新状态（只在 Tempo 内）", detail: refreshDescription, accessory: refreshToggle),
-                AppLifecycleUI.row("⌘ 加字母或数字", accessory: key)])]
+        return [AppLifecycleUI.group(String(localized: "Safari Playback"), rows: [
+            AppLifecycleUI.row(String(localized: "Playback speed"), detail: message, accessory: edit),
+            AppLifecycleUI.row(String(localized: "On-page speed indicator"), accessory: indicator),
+            AppLifecycleUI.row(String(localized: "Media shortcuts"), detail: AppLifecycleUI.detailLabel(String(localized: "In Safari’s Tempo toolbar panel, open Shortcuts & Settings. The tempo keys and bind commands use the same settings.")))]),
+            AppLifecycleUI.group(String(localized: "App Shortcuts"), rows: [
+                AppLifecycleUI.row(String(localized: "Refresh status in Tempo"), detail: refreshDescription, accessory: refreshToggle),
+                AppLifecycleUI.row(String(localized: "⌘ + a letter or number"), accessory: key)])]
     }
     func refresh() {
         refreshCount += 1
         try? capture()
         do {
             let s = try settings(); speed.stringValue = String(describing: s["speed"]!); indicator.state = (s["indicator"] as? Bool) == true ? .on : .off
-            message.stringValue = "与 Safari 面板共用配置；速度 0.1–16×"
-        } catch { message.stringValue = "Safari 设置未就绪：\(error.localizedDescription)" }
+            message.stringValue = String(localized: "Shared with Safari’s Tempo panel. Speed range: 0.1–16×.")
+        } catch { message.stringValue = String(localized: "Safari settings are not ready. \(Self.guiError(error))") }
         refreshToggle.state = shortcuts.enabled ? .on : .off; refreshKey.stringValue = shortcuts.binding.key
-        refreshDescription.stringValue = shortcuts.descriptionText
+        refreshDescription.stringValue = shortcuts.displayText
     }
     @objc func saveSpeed() {
         do { _ = try CLI.execute(["speed", speed.stringValue, "--json"]); try capture(); configuration.reconcile(); refresh() }
-        catch { message.stringValue = "未保存；原设置保留：\(error.localizedDescription)" }
+        catch { message.stringValue = String(localized: "Not saved. Your previous settings are unchanged. \(Self.guiError(error))") }
     }
     @objc func saveIndicator() {
         do { _ = try CLI.execute(["set", "indicator", indicator.state == .on ? "on" : "off", "--json"]); try capture(); configuration.reconcile() }
-        catch { message.stringValue = "未保存；原设置保留" }
+        catch { message.stringValue = String(localized: "Not saved. Your previous settings are unchanged. \(Self.guiError(error))") }
     }
-    @objc func toggleRefresh() { shortcuts.setEnabled(refreshToggle.state == .on); refreshDescription.stringValue = shortcuts.descriptionText }
+    @objc func toggleRefresh() { shortcuts.setEnabled(refreshToggle.state == .on); refreshDescription.stringValue = shortcuts.displayText }
     @objc func changeKey() {
-        do { try shortcuts.setBinding(.init(key: refreshKey.stringValue.lowercased(), modifiers: .command)); refreshDescription.stringValue = shortcuts.descriptionText }
-        catch { message.stringValue = error.localizedDescription }
+        do { try shortcuts.setBinding(.init(key: refreshKey.stringValue.lowercased(), modifiers: .command)); refreshDescription.stringValue = shortcuts.displayText }
+        catch { message.stringValue = String(localized: "Shortcut not saved. Choose an unused ⌘ shortcut with one letter or number. Your previous shortcut is unchanged.") }
+    }
+    /// UI recovery guidance stays separate from the CLI's stable error codes and output strings.
+    static func guiError(_ error: Error) -> String {
+        guard let failure = error as? CLIFailure else {
+            return String(localized: "Check the settings and try again. Your saved settings are unchanged.")
+        }
+        switch failure.code {
+        case "store_missing":
+            return String(localized: "Open Tempo’s panel in Safari and change a setting to create its settings store.")
+        case "store_unreadable":
+            return String(localized: "Tempo cannot access Safari’s settings. Check Full Disk Access in System Settings, then try again.")
+        case "store_unsupported":
+            return String(localized: "Safari’s settings format has changed. Update Tempo before trying again.")
+        case "bad_value", "out_of_range":
+            return String(localized: "Enter a playback speed from 0.1 to 16.")
+        case "engine_missing", "engine_failed":
+            return String(localized: "Tempo could not load its settings engine. Reinstall Tempo, then try again.")
+        default:
+            return String(localized: "Check the settings and try again. Your saved settings are unchanged.")
+        }
     }
     /// A re-identified fixture must validate the public package against the production identity, while
     /// keeping preference writes in its disposable identity. Same fetch/parser as the production checker.
@@ -218,6 +242,12 @@ final class TempoBasics: NSObject {
             RunLoop.current.run(until: Date().addingTimeInterval(0.4))
             let history = AppUpdatePreferences.status(Bundle.main.bundleIdentifier!, source: b.source)["history"] as? [String: Any]
             checks["updates.actual_check_action"] = history?["last_attempt_at"] != nil
+            // HTTPS feed (shared AppUpdateFeed): registered, parsed by the production rules, daily check seeded on first open.
+            checks.merge(AppUpdateFeed.selfTest(bundleID: Self.bundleID)) { $1 }
+            // The registered feed is the public release manifest every direct build since 0.1.4 reads.
+            if case .manifest(let url) = Self.productionSource {
+                checks["update.source_public_release"] = url == Self.publicManifest
+            } else { checks["update.source_public_release"] = false }
             // Closing the actual offscreen settings windows exercises the normal close path.
             NSApp.windows.forEach { $0.performClose(nil) }
             checks["ui.close_action"] = NSApp.windows.allSatisfy { !$0.isVisible }

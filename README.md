@@ -2,20 +2,20 @@
 
 **中文** | [English](README_EN.md)
 
-[下载正式 ZIP](https://github.com/zengtianli/tempo-oss/releases/download/v0.1.4/Tempo-0.1.4-mac.zip) · [MIT 公开源码](https://github.com/zengtianli/tempo-oss)。
+直接下载：[GitHub 最新发行版](https://github.com/zengtianli/tempo-oss/releases/latest)（Developer ID 签名、公证并装订的 ZIP 与 DMG，附 `SHA256SUMS.txt` 和 App 内更新读的 `release-manifest.json`）；源码是同一版的 [MIT 公开快照](https://github.com/zengtianli/tempo-oss)。商店／TestFlight 版另走 Apple 的渠道。
 
 给 Safari 网页的视频和音频设定统一播放速度，随时用键盘调整，也能按网站记住速度或停用规则。功能灵感来自 [Global Speed](https://github.com/polywock/globalSpeed)，Safari 实现由 Tempo 自己提供。
 
 ## 安装与启用
 
-需要 macOS 14 或更新版本。到 [Releases](https://github.com/zengtianli/tempo-oss/releases/latest) 下载已用 Developer ID 签名、公证并装订的 ZIP，解压后把 `Tempo.app` 拖进「应用程序」。发行页提供 SHA256 校验文件。
+需要 macOS 14 或更新版本。从 [最新发行版](https://github.com/zengtianli/tempo-oss/releases/latest) 下载 `Tempo-<版本>-universal.zip`（或同名 `.dmg`），可用 `SHA256SUMS.txt` 核对；解压后把已用 Developer ID 签名、公证并装订的 `Tempo.app` 放进「应用程序」。商店／TestFlight 由对应客户端安装；同一 bundle ID 在「应用程序」只保留一份，切换渠道前保留旧包。
 
 1. 打开 Tempo，点「打开 Safari 扩展设置」；也可以直接进 Safari → 设置 → 扩展。
 2. 勾选 **Tempo · 倍速**。
 3. 在网站访问权限里选择要允许的网站；需要全局倍速时，选择「在所有网站上始终允许」。启用与网站授权需要你亲自确认。
 4. 刷新启用前已经打开的网页，点 Safari 工具栏上的 Tempo 图标设置速度。
 
-升级前从面板导出配置留底；退出 Tempo 容器窗口再替换 App。设置保存在 Safari 中，安装包不带作者的设置。容器 App 的「设置与更新…」可检查既有公开 Release，并选择自动检查的间隔；默认关闭自动检查、下载与安装。
+升级前从面板导出配置留底；退出 Tempo 容器窗口再替换 App。设置保存在 Safari 中，安装包不带作者的设置。直接分发版「设置…」的检查更新读 GitHub 最新发行版的 `release-manifest.json`（包里登记的 `AppUpdateFeedURL`，来自 `project.yml`；不要账号，也不要 iCloud），第一次打开容器 App 默认每天自动检查一次（只在 App 打开期间），可改间隔或关闭；默认不自动下载与安装，确认升级时先核对安装包的 SHA256、签名团队与公证再替换。商店版由 App Store 更新。
 
 ## 功能与快捷键
 
@@ -36,11 +36,15 @@
 
 ## 命令行
 
-拖入 App 后可直接用 `/Applications/Tempo.app/Contents/MacOS/Tempo`，或创建软链：
+拖入 App 后可直接用 `/Applications/Tempo.app/Contents/MacOS/Tempo`。源码安装器会创建下面这个真实路径入口；手动安装时也可创建，更新命令不能通过软链启动：
 
 ```sh
 mkdir -p ~/.local/bin
-ln -s /Applications/Tempo.app/Contents/MacOS/Tempo ~/.local/bin/tempo
+cat > ~/.local/bin/tempo <<'SH'
+#!/bin/sh
+exec /Applications/Tempo.app/Contents/MacOS/Tempo "$@"
+SH
+chmod +x ~/.local/bin/tempo
 ```
 
 把 `~/.local/bin` 加入 PATH；已有同名文件时先检查，不要覆盖。命令带参数时不开窗口，和面板读写同一份设置：
@@ -103,9 +107,9 @@ bash scripts/install.sh
 
 ## 隐私、限制与排障
 
-不收集使用数据。网页扩展自身不联网；容器 App 检查更新时匿名读取 GitHub 公开 Release 的既有 release-manifest.json，可选 iCloud 配置同步由系统 Apple ID 与 iCloud Drive 完成。网站权限用于找到媒体并调整播放；`storage` 存本机设置，`nativeMessaging` 只用于本机容器扩展通信。可选通道会读当前标签页主机名与媒体状态，请求和回答留在扩展沙盒里，读完删除；能访问该目录的本机程序也能发同类请求。
+不收集使用数据。网页扩展自身不联网；直接分发版检查更新匿名读取 HTTPS 发行记录（不带账号或设备信息），可选 iCloud 配置同步由系统 Apple ID 与 iCloud Drive 完成。网站权限用于找到媒体并调整播放；`storage` 存本机设置，`nativeMessaging` 只用于本机容器扩展通信。可选通道会读当前标签页主机名与媒体状态，请求和回答留在扩展沙盒里，读完删除；能访问该目录的本机程序也能发同类请求。
 
-- 「设置与更新…」提供可选 iCloud 同步（默认关闭），同步速度、网站规则、媒体按键与本 App 刷新键；命令通道开关、Safari 网站授权不迁移。同步在容器 App 打开期间通过文件事件跟随，或用 `tempo config sync on --yes` 显式同步；无常驻同步后台。换机也可导出 / 导入。
+- 「设置…」提供可选 iCloud 同步（默认关闭），同步速度、网站规则、媒体按键与本 App 刷新键；命令通道开关、Safari 网站授权不迁移。同步在容器 App 打开期间通过文件事件跟随，或用 `tempo config sync on --yes` 显式同步；无常驻同步后台。换机也可导出 / 导入。
 - CLI：`tempo config status --json`、`tempo config export -o 文件`、`tempo config import 文件 --yes`、`tempo config sync on|off --yes`、`tempo update check --json`、`tempo update options --json`。原生窗口 ⌘R 刷新，可关闭/改键，保留系统编辑组合。
 - 没有固定到单个标签页的速度、音效或画面滤镜；只提供 macOS Safari 版。
 - 扩展找不到：检查安装包是否已公证、App 是否在「应用程序」。

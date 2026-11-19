@@ -3,6 +3,7 @@
 #
 #   bash build.sh              run the tests, then build and sign
 #   bash build.sh --test-only  run the tests only
+#   bash build.sh --quick      local iteration; tests run separately, no distribution timestamp
 #
 # Signing uses the Developer ID identity named in project.yml; override with CODE_SIGN_IDENTITY.
 #
@@ -16,7 +17,9 @@ set -euo pipefail
 cd "$(dirname "$0")"
 ROOT="$(pwd -P)"
 
-bash Tests/run.sh
+QUICK=0
+[ "${1:-}" = "--quick" ] && QUICK=1
+if [ "$QUICK" = 0 ]; then bash Tests/run.sh; fi
 [ "${1:-}" = "--test-only" ] && exit 0
 
 # The app and the extension manifest carry the same version.
@@ -67,8 +70,10 @@ fi
 # An app product left by an earlier build can still have the extension inside, and xcodebuild would register
 # it as it stands. Neither copy is registered at this point (checked above), so both are simply removed.
 rm -rf "$PRODUCTS/Tempo.app" build/Tempo.app
+SIGN_FLAGS=()
+[ "$QUICK" = 1 ] && SIGN_FLAGS+=(OTHER_CODE_SIGN_FLAGS=--timestamp=none)
 xcodebuild -project Tempo.xcodeproj -scheme Tempo -configuration Release \
-  -derivedDataPath build/DerivedData ${CODE_SIGN_IDENTITY:+CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY"} ${DEVELOPMENT_TEAM:+DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM"} -quiet build
+  -derivedDataPath build/DerivedData ${CODE_SIGN_IDENTITY:+CODE_SIGN_IDENTITY="$CODE_SIGN_IDENTITY"} "${SIGN_FLAGS[@]}" ${DEVELOPMENT_TEAM:+DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM"} -quiet build
 if [ -e "$PRODUCTS/Tempo.app/Contents/PlugIns" ]; then
   echo "the app product has plug-ins inside, so xcodebuild registered them; see the check at the end" >&2
 fi
@@ -82,7 +87,9 @@ ditto "$PRODUCTS/TempoExtension.appex" build/Tempo.app/Contents/PlugIns/TempoExt
 SIGNATURE="$(codesign -dvv "$PRODUCTS/Tempo.app" 2>&1)"
 IDENTITY="${CODE_SIGN_IDENTITY:-$(sed -n 's/^Authority=//p' <<<"$SIGNATURE" | sed -n 1p)}"
 [ -n "$IDENTITY" ] || { echo "could not read the signing identity from $PRODUCTS/Tempo.app" >&2; exit 1; }
-codesign --force --sign "$IDENTITY" --options runtime --timestamp build/Tempo.app
+STAMP=--timestamp
+[ "$QUICK" = 1 ] && STAMP=--timestamp=none
+codesign --force --sign "$IDENTITY" --options runtime "$STAMP" build/Tempo.app
 codesign --verify --deep --strict build/Tempo.app
 test -f build/Tempo.app/Contents/PlugIns/TempoExtension.appex/Contents/Resources/manifest.json
 

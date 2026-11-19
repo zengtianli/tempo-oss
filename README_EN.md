@@ -2,20 +2,20 @@
 
 [中文](README.md) | **English**
 
-[Download the distribution ZIP](https://github.com/zengtianli/tempo-oss/releases/download/v0.1.4/Tempo-0.1.4-mac.zip) · [MIT source snapshot](https://github.com/zengtianli/tempo-oss).
+Direct download: [latest GitHub release](https://github.com/zengtianli/tempo-oss/releases/latest) (Developer ID signed, notarized and stapled ZIP and DMG, with `SHA256SUMS.txt` and the `release-manifest.json` the app's update check reads); the source is the matching [MIT snapshot](https://github.com/zengtianli/tempo-oss). App Store / TestFlight builds ship through Apple's channels.
 
 Set one playback speed for videos and audio in Safari, adjust it with the keyboard, and remember a speed or disable the extension per site. [Global Speed](https://github.com/polywock/globalSpeed) inspired the features; Tempo provides its own Safari implementation.
 
 ## Install and enable
 
-Requires macOS 14 or later. Download the Developer ID signed, notarized and stapled ZIP from [Releases](https://github.com/zengtianli/tempo-oss/releases/latest), unzip it, and drag `Tempo.app` into Applications. Releases include a SHA256 checksum file.
+Requires macOS 14 or later. Download `Tempo-<version>-universal.zip` (or the `.dmg` of the same name) from the [latest release](https://github.com/zengtianli/tempo-oss/releases/latest), optionally check it against `SHA256SUMS.txt`, and move the Developer ID signed, notarized and stapled app into Applications. Store / TestFlight builds install through Apple's clients. Keep only one installed copy of this bundle ID, preserving the previous app before switching channels.
 
 1. Open Tempo and click its button to open Safari extension settings, or go to Safari → Settings → Extensions.
 2. Enable **Tempo · 倍速**.
 3. Choose which websites it may access. For global speed control, choose Always Allow on Every Website. You must confirm enablement and website permissions yourself.
 4. Reload pages opened before enabling it, then click Tempo in Safari's toolbar to set the speed.
 
-Export settings from the panel before upgrading, close the Tempo host window, and replace the app. Settings remain in Safari; packages contain no author's configuration. The host app's Settings and Updates window checks the existing public Release manifest and offers check intervals; automatic checks, downloads and installation default to off.
+Export settings from the panel before upgrading, close the Tempo host window, and replace the app. Settings remain in Safari; packages contain no author's configuration. The direct app's update check reads `release-manifest.json` from the latest GitHub release (the `AppUpdateFeedURL` registered in the app from `project.yml`; no account or iCloud needed). The first time the host app opens it turns on a daily automatic check (only while the app is open), which can be changed or turned off; automatic downloads and installation default to off, and a confirmed upgrade verifies the package's SHA256, signing team and notarization before replacing the app. Store builds update through the App Store.
 
 ## Features and shortcuts
 
@@ -36,11 +36,15 @@ Play/pause, mute, picture in picture and the Tempo switch have no default key; b
 
 ## Command line
 
-Use `/Applications/Tempo.app/Contents/MacOS/Tempo` directly or create a symlink:
+Use `/Applications/Tempo.app/Contents/MacOS/Tempo` directly. The source installer creates this real-path command entry; manual installs can create it too. Update commands cannot start through a symlink:
 
 ```sh
 mkdir -p ~/.local/bin
-ln -s /Applications/Tempo.app/Contents/MacOS/Tempo ~/.local/bin/tempo
+cat > ~/.local/bin/tempo <<'SH'
+#!/bin/sh
+exec /Applications/Tempo.app/Contents/MacOS/Tempo "$@"
+SH
+chmod +x ~/.local/bin/tempo
 ```
 
 Add `~/.local/bin` to PATH. Inspect any existing command before replacing it. Commands with arguments do not open a window and use the same settings as the panel:
@@ -103,7 +107,7 @@ This is a one-way allowlisted snapshot of the development repository, excluding 
 
 ## Privacy, limitations and troubleshooting
 
-No usage data collection. The web extension makes no network calls. The host app anonymously reads the existing GitHub Release manifest for updates; optional configuration sync uses the system Apple ID and iCloud Drive. Website access locates and adjusts media; `storage` holds local settings and `nativeMessaging` communicates only with the local app extension. The optional channel reads the current tab's hostname and media state; requests and replies remain in its sandbox and are removed after reading. Other local programs with access to that directory can send equivalent requests.
+No usage data collection. The web extension makes no network calls. Direct app updates read an HTTPS release record anonymously (no account or device data); optional configuration sync uses the system Apple ID and iCloud Drive. Website access locates and adjusts media; `storage` holds local settings and `nativeMessaging` communicates only with the local app extension. The optional channel reads the current tab's hostname and media state; requests and replies remain in its sandbox and are removed after reading. Other local programs with access to that directory can send equivalent requests.
 
 - Optional iCloud settings sync defaults to off. The host's Settings and Updates window synchronizes speed, site rules, media keys and the host refresh key while open, without a persistent background process. The command channel and Safari permissions remain local. Panel export/import remains available between Macs.
 - `tempo config status --json`, `tempo config export -o file`, `tempo config import file --yes`, `tempo config sync on|off --yes`, `tempo update check --json` and `tempo update options --json` share the native window's implementation. The host refresh shortcut defaults to Command-R and can be disabled or changed without taking system editing shortcuts.

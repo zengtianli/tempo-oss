@@ -63,8 +63,13 @@ enum Main {
 
     static func main() {
         #if !APP_STORE
+        if CommandLine.arguments.dropFirst().first == "--l10n-self-test" { TempoLocalizationAcceptance.run() }
         if CommandLine.arguments.dropFirst().first == "--ui-self-test" { TempoBasics.selfTest(); exit(0) }
         if CommandLine.arguments.dropFirst().first == "--update-source-self-test" { TempoBasics.liveUpdateSelfTest() }
+        // `tempo feed <latest.json>`: read a release record with this app's own parser before it is published.
+        if AppUpdateFeed.handles(CommandLine.arguments.dropFirst().first) {
+            exit(AppUpdateFeed.run(Array(CommandLine.arguments.dropFirst()), bundleID: TempoBasics.bundleID))
+        }
         if AppLifecycleCLI.handles(CommandLine.arguments.dropFirst().first) {
             exit(TempoBasics.shared.command(Array(CommandLine.arguments.dropFirst())))
         }
@@ -141,7 +146,7 @@ struct TempoApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
 
     var body: some Scene {
-        Window("Tempo · 倍速", id: "main") {
+        Window("Tempo", id: "main") {
             ContentView()
         }
         .windowResizability(.contentSize)
@@ -160,12 +165,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 struct ContentView: View {
     @State private var enabled: Bool?
     @State private var problem: String?
-    private let notarized = isNotarized()
+    private let notarized: Bool
+    private let observesSafari: Bool
 
-    private let shortcuts: [(String, String)] = [
-        ("D", "加速"), ("A", "减速"), ("S", "1× / 上次速度"),
-        ("X", "快进"), ("Z", "快退"), ("⇧X  ⇧Z", "逐帧"),
-        ("⇧W", "记下位置"), ("W", "回到记下的位置"),
+    init() {
+        notarized = isNotarized()
+        observesSafari = true
+    }
+
+    /// Uses the production view without contacting Safari or opening a window during visual acceptance.
+    init(previewEnabled: Bool?, previewNotarized: Bool, previewProblem: String? = nil) {
+        _enabled = State(initialValue: previewEnabled)
+        _problem = State(initialValue: previewProblem)
+        notarized = previewNotarized
+        observesSafari = false
+    }
+
+    private let shortcuts: [(String, LocalizedStringKey)] = [
+        ("D", "Speed up"), ("A", "Slow down"), ("S", "1× / Previous speed"),
+        ("X", "Seek forward"), ("Z", "Seek backward"), ("⇧X  ⇧Z", "Step through frames"),
+        ("⇧W", "Save playback position"), ("W", "Return to saved position"),
     ]
 
     var body: some View {
@@ -175,42 +194,45 @@ struct ContentView: View {
                     .resizable()
                     .frame(width: 64, height: 64)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Tempo · 倍速").font(.title2.weight(.semibold))
-                    Text("给 Safari 里所有网页视频和音频设一个播放速度。")
+                    Text("Tempo").font(.title2.weight(.semibold))
+                    Text("Set one playback speed for video and audio across Safari.")
                         .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
 
             GroupBox {
-                HStack {
+                HStack(alignment: .center, spacing: 12) {
                     Circle().fill(statusColor).frame(width: 9, height: 9)
                     Text(statusText)
+                        .fixedSize(horizontal: false, vertical: true)
                     Spacer()
-                    Button("打开 Safari 扩展设置") { openSettings() }
+                    Button("Open Safari Extension Settings") { openSettings() }
                         .keyboardShortcut(.defaultAction)
+                        .fixedSize()
                 }
                 .padding(4)
             }
 
             if !notarized {
-                Text("这一版没有经过苹果公证，Safari 不会把它列在“扩展”里。请装公证过的版本。")
+                Text("This build has not been notarized by Apple, so Safari will not list the extension. Install a notarized version.")
                     .font(.callout)
                     .foregroundStyle(.red)
                     .fixedSize(horizontal: false, vertical: true)
             } else if enabled == true {
-                Text("按键没反应时：在视频页点工具栏上的 Tempo 图标，选“始终允许在每个网站上”，再刷新页面。")
+                Text("If shortcuts do not respond, click Tempo in Safari’s toolbar on the video page, choose “Always Allow on Every Website,” then reload the page.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
-                Text("在 Safari 设置的“扩展”里勾选 Tempo，并把网站权限设为“在所有网站上始终允许”。")
+                Text("Enable Tempo in Safari Settings → Extensions, then set website access to “Always Allow on Every Website.”")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("默认快捷键").font(.headline)
+                Text("Default Shortcuts").font(.headline)
                 Grid(alignment: .leading, horizontalSpacing: 18, verticalSpacing: 5) {
                     ForEach(shortcuts, id: \.0) { key, name in
                         GridRow {
@@ -219,21 +241,22 @@ struct ContentView: View {
                         }
                     }
                 }
-                Text("页面里有视频或音频、且没有在输入文字时生效；可在工具栏的 Tempo 面板里改键。")
+                Text("Shortcuts work on pages with video or audio while you are not typing. Customize them in Tempo’s toolbar panel.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            Text("版本 \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")")
+            Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")")
                 .font(.footnote)
                 .foregroundStyle(.tertiary)
             #if !APP_STORE
-            Button("设置与更新…") { AppLifecycleUI.shared.show() }
+            // The standard settings entry: the same 设置… window ⌘, opens (swift-shared「标准设置入口模块」).
+            Button("Settings…") { AppLifecycleUI.openStandardSettings() }
             #endif
         }
         .padding(22)
-        .frame(width: 440)
+        .frame(width: 500)
         .onAppear(perform: refresh)
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in refresh() }
     }
@@ -249,17 +272,18 @@ struct ContentView: View {
     private var statusText: String {
         if let problem { return problem }
         switch enabled {
-        case .some(true): return "已在 Safari 中启用"
-        case .some(false): return "还没有在 Safari 中启用"
-        case .none: return "正在读取状态…"
+        case .some(true): return String(localized: "Enabled in Safari")
+        case .some(false): return String(localized: "Not enabled in Safari")
+        case .none: return String(localized: "Checking status…")
         }
     }
 
     private func refresh() {
+        guard observesSafari else { return }
         SFSafariExtensionManager.getStateOfSafariExtension(withIdentifier: extensionIdentifier) { state, error in
             DispatchQueue.main.async {
                 enabled = state?.isEnabled
-                problem = error == nil ? nil : "读不到扩展状态，请先打开一次 Safari"
+                problem = error == nil ? nil : String(localized: "Unable to check the extension. Open Safari, then try again.")
             }
         }
     }

@@ -1,12 +1,13 @@
 name: Tempo
 options:
+  developmentLanguage: en
   deploymentTarget:
     macOS: "14.0"
   createIntermediateGroups: true
 settings:
   base:
-    MARKETING_VERSION: "0.1.4"
-    CURRENT_PROJECT_VERSION: "6"
+    MARKETING_VERSION: "0.1.5"
+    CURRENT_PROJECT_VERSION: "9"
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: "Developer ID Application"
@@ -30,10 +31,16 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: Tempo
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations: [en, zh-Hans]
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         CFBundleIconFile: AppIcon
         LSApplicationCategoryType: public.app-category.utilities
+        # 直接分发版的整包更新地址只登记这一处（共享 AppUpdateFeed 读它；update_feed.py 从包里读同一项）：
+        # 公开仓 tempo-oss 最新 Release 的附件 release-manifest.json（0.1.4 起的公开版都读这个名字，不能改名）。
+        # 商店版 store/project.yml 不带这一项，仍由 App Store 更新。
+        AppUpdateFeedURL: https://github.com/zengtianli/tempo-oss/releases/latest/download/release-manifest.json
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: cyou.tianli.tempo
@@ -49,17 +56,24 @@ targets:
     sources:
       - path: Extension/SafariWebExtensionHandler.swift
       - path: Extension/Relay.swift
+      - path: Extension/InfoPlist.xcstrings
+        buildPhase: resources
       - path: Shared
       - path: Extension/Resources
         buildPhase: resources
-        excludes: ["images"]
+        excludes: ["images", "_locales"]
       - path: Extension/Resources/images
+        type: folder
+        buildPhase: resources
+      - path: Extension/Resources/_locales
         type: folder
         buildPhase: resources
     info:
       path: Extension/Info.plist
       properties:
-        CFBundleDisplayName: Tempo · 倍速
+        CFBundleDisplayName: Tempo
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations: [en, zh-Hans]
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
